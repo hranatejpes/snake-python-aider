@@ -205,7 +205,7 @@ def draw_difficulty_screen(screen):
     
     # Exit button
     exit_text = button_font.render('Exit', True, WHITE)
-    exit_rect = exit_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 + 120))
+    exit_rect = exit_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 + 180))
     pygame.draw.rect(screen, WHITE, exit_rect.inflate(20, 10), 2)
     screen.blit(exit_text, exit_rect)
     button_rects.append(exit_rect.inflate(20, 10))
