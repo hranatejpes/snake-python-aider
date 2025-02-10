@@ -203,6 +203,13 @@ def draw_difficulty_screen(screen):
         screen.blit(text, rect)
         button_rects.append(rect.inflate(20, 10))
     
+    # Exit button
+    exit_text = button_font.render('Exit', True, WHITE)
+    exit_rect = exit_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 + 120))
+    pygame.draw.rect(screen, WHITE, exit_rect.inflate(20, 10), 2)
+    screen.blit(exit_text, exit_rect)
+    button_rects.append(exit_rect.inflate(20, 10))
+    
     pygame.display.update()
     return button_rects
 
@@ -256,6 +263,9 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 for i, rect in enumerate(difficulty_buttons):
                     if rect.collidepoint(event.pos):
+                        if i == 3:  # Exit button
+                            pygame.quit()
+                            sys.exit()
                         difficulty = ['easy', 'medium', 'hard'][i]
     
     while running:
@@ -332,10 +342,12 @@ def main():
         for enemy in enemies:
             enemy.render()
         
-        # Draw score
+        # Draw score and difficulty
         font = pygame.font.Font(None, 36)
         score_text = font.render(f'Score: {snake.score}', True, WHITE)
+        diff_text = font.render(f'Difficulty: {difficulty.capitalize()}', True, WHITE)
         screen.blit(score_text, (10, 10))
+        screen.blit(diff_text, (WINDOW_SIZE - diff_text.get_width() - 10, 10))
         
         if game_over:
             restart_button_rect = draw_game_over_screen(screen, snake.score)
