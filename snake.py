@@ -189,10 +189,8 @@ def main():
                 abs(ey - sy) < GRID_SIZE):
                 snake.reset()
                 food.randomize_position()
-                # Reset enemy positions
-                for e in enemies:
-                    e.position = (random.randint(0, GRID_COUNT-1) * GRID_SIZE,
-                                random.randint(0, GRID_COUNT-1) * GRID_SIZE)
+                # Clear all enemies
+                enemies.clear()
 
         # Draw
         screen.fill(BLACK)
