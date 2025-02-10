@@ -15,6 +15,8 @@ BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)
+PINK = (255, 192, 203)
+PURPLE = (128, 0, 128)
 
 # Initialize screen
 screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
@@ -74,9 +76,65 @@ DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
+class Enemy:
+    def __init__(self, enemy_type):
+        self.position = (random.randint(0, GRID_COUNT-1) * GRID_SIZE,
+                        random.randint(0, GRID_COUNT-1) * GRID_SIZE)
+        self.enemy_type = enemy_type
+        if enemy_type == 'circle':
+            self.color = WHITE
+            self.speed = 0.3
+        elif enemy_type == 'square':
+            self.color = PINK
+            self.speed = 0.5
+        else:  # triangle
+            self.color = PURPLE
+            self.speed = 0.7
+            
+    def move_towards(self, target_pos):
+        x, y = self.position
+        tx, ty = target_pos
+        
+        # Calculate direction
+        dx = tx - x
+        dy = ty - y
+        
+        # Normalize and apply speed
+        distance = max(abs(dx), abs(dy))
+        if distance > 0:
+            dx = (dx / distance) * GRID_SIZE * self.speed
+            dy = (dy / distance) * GRID_SIZE * self.speed
+            
+        # Update position
+        new_x = (x + dx) % WINDOW_SIZE
+        new_y = (y + dy) % WINDOW_SIZE
+        self.position = (new_x, new_y)
+        
+    def render(self):
+        x, y = self.position
+        if self.enemy_type == 'circle':
+            pygame.draw.circle(screen, self.color, 
+                             (int(x + GRID_SIZE/2), int(y + GRID_SIZE/2)), 
+                             GRID_SIZE//2)
+        elif self.enemy_type == 'square':
+            pygame.draw.rect(screen, self.color, 
+                           (x, y, GRID_SIZE, GRID_SIZE))
+        else:  # triangle
+            points = [
+                (x + GRID_SIZE/2, y),
+                (x, y + GRID_SIZE),
+                (x + GRID_SIZE, y + GRID_SIZE)
+            ]
+            pygame.draw.polygon(screen, self.color, points)
+
 def main():
     snake = Snake()
     food = Food()
+    enemies = [
+        Enemy('circle'),
+        Enemy('square'),
+        Enemy('triangle')
+    ]
     running = True
 
     while running:
@@ -105,10 +163,27 @@ def main():
             snake.score += 1
             food.randomize_position()
 
+        # Update enemies
+        for enemy in enemies:
+            enemy.move_towards(snake.get_head_position())
+            # Check collision with snake head
+            ex, ey = enemy.position
+            sx, sy = snake.get_head_position()
+            if (abs(ex - sx) < GRID_SIZE and 
+                abs(ey - sy) < GRID_SIZE):
+                snake.reset()
+                food.randomize_position()
+                # Reset enemy positions
+                for e in enemies:
+                    e.position = (random.randint(0, GRID_COUNT-1) * GRID_SIZE,
+                                random.randint(0, GRID_COUNT-1) * GRID_SIZE)
+
         # Draw
         screen.fill(BLACK)
         snake.render()
         food.render()
+        for enemy in enemies:
+            enemy.render()
         
         # Draw score
         font = pygame.font.Font(None, 36)
