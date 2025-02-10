@@ -275,11 +275,14 @@ def main():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                for i, rect in enumerate(difficulty_buttons):
-                    if rect.collidepoint(event.pos):
-                        if i == 3:  # Exit button
-                            pygame.quit()
-                            sys.exit()
+                mouse_pos = event.pos
+                # Check exit button first (last button)
+                if difficulty_buttons[-1].collidepoint(mouse_pos):
+                    pygame.quit()
+                    sys.exit()
+                # Then check difficulty buttons
+                for i, rect in enumerate(difficulty_buttons[:-1]):  # Exclude exit button
+                    if rect.collidepoint(mouse_pos):
                         difficulty = ['easy', 'medium', 'hard'][i]
     
     while running:
