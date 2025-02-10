@@ -178,6 +178,34 @@ def spawn_enemy(snake_pos):
     enemy.position = (x, y)
     return enemy
 
+def draw_difficulty_screen(screen):
+    # Semi-transparent overlay
+    overlay = pygame.Surface((WINDOW_SIZE, WINDOW_SIZE))
+    overlay.fill(BLACK)
+    overlay.set_alpha(128)
+    screen.blit(overlay, (0, 0))
+    
+    # Title text
+    font = pygame.font.Font(None, 74)
+    title_text = font.render('Select Difficulty', True, WHITE)
+    title_rect = title_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 - 100))
+    screen.blit(title_text, title_rect)
+    
+    # Difficulty buttons
+    button_font = pygame.font.Font(None, 36)
+    difficulties = ['Easy', 'Medium', 'Hard']
+    button_rects = []
+    
+    for i, diff in enumerate(difficulties):
+        text = button_font.render(diff, True, WHITE)
+        rect = text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 - 20 + i * 60))
+        pygame.draw.rect(screen, WHITE, rect.inflate(20, 10), 2)
+        screen.blit(text, rect)
+        button_rects.append(rect.inflate(20, 10))
+    
+    pygame.display.update()
+    return button_rects
+
 def draw_game_over_screen(screen, score):
     # Semi-transparent overlay
     overlay = pygame.Surface((WINDOW_SIZE, WINDOW_SIZE))
@@ -209,11 +237,27 @@ def draw_game_over_screen(screen, score):
 def main():
     snake = Snake()
     food = Food()
-    enemies = []  # Start with no enemies
+    enemies = []
     running = True
     game_over = False
     restart_button_rect = None
-
+    food_counter = 0  # Counter for spawning enemies
+    
+    # Initial difficulty selection
+    screen.fill(BLACK)
+    difficulty_buttons = draw_difficulty_screen(screen)
+    difficulty = None
+    
+    while difficulty is None:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for i, rect in enumerate(difficulty_buttons):
+                    if rect.collidepoint(event.pos):
+                        difficulty = ['easy', 'medium', 'hard'][i]
+    
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -240,8 +284,14 @@ def main():
             snake.score += food.points
             food.randomize_position()
             food.randomize_type()
-            # Spawn new enemy when food is eaten
-            enemies.append(spawn_enemy(snake.get_head_position()))
+            # Enemy spawning based on difficulty
+            food_counter += 1
+            if difficulty == 'hard':
+                enemies.append(spawn_enemy(snake.get_head_position()))
+            elif difficulty == 'medium' and food_counter % 2 == 0:
+                enemy = spawn_enemy(snake.get_head_position())
+                enemy.enemy_type = 'circle'  # Only spawn easiest enemy type
+                enemies.append(enemy)
 
         # Update enemies
         for enemy in enemies:
@@ -278,11 +328,27 @@ def main():
                         sys.exit()
                     elif event.type == pygame.MOUSEBUTTONDOWN:
                         if restart_button_rect.collidepoint(event.pos):
-                            game_over = False
-                            snake.reset()
-                            food.randomize_position()
-                            enemies.clear()
-                            waiting_for_restart = False
+                            # Return to difficulty selection
+                            screen.fill(BLACK)
+                            difficulty_buttons = draw_difficulty_screen(screen)
+                            waiting_for_difficulty = True
+                            
+                            while waiting_for_difficulty:
+                                for diff_event in pygame.event.get():
+                                    if diff_event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    elif diff_event.type == pygame.MOUSEBUTTONDOWN:
+                                        for i, rect in enumerate(difficulty_buttons):
+                                            if rect.collidepoint(diff_event.pos):
+                                                difficulty = ['easy', 'medium', 'hard'][i]
+                                                game_over = False
+                                                snake.reset()
+                                                food.randomize_position()
+                                                enemies.clear()
+                                                food_counter = 0
+                                                waiting_for_restart = False
+                                                waiting_for_difficulty = False
                 clock.tick(30)
         else:
             pygame.display.update()
