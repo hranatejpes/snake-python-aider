@@ -267,20 +267,26 @@ def main():
         
         if game_over:
             restart_button_rect = draw_game_over_screen(screen, snake.score)
-            # Handle restart button click
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if restart_button_rect.collidepoint(event.pos):
-                        game_over = False
-                        snake.reset()
-                        food.randomize_position()
-                        enemies.clear()
-        
-        pygame.display.update()
-        clock.tick(10)  # Control game speed
+            pygame.display.update()
+            
+            # Wait for restart
+            waiting_for_restart = True
+            while waiting_for_restart:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        if restart_button_rect.collidepoint(event.pos):
+                            game_over = False
+                            snake.reset()
+                            food.randomize_position()
+                            enemies.clear()
+                            waiting_for_restart = False
+                clock.tick(30)
+        else:
+            pygame.display.update()
+            clock.tick(10)  # Control game speed
 
 if __name__ == '__main__':
     main()
