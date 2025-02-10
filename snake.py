@@ -319,8 +319,16 @@ def main():
                             elif diff_event.type == pygame.MOUSEBUTTONDOWN:
                                 for i, rect in enumerate(difficulty_buttons):
                                     if rect.collidepoint(diff_event.pos):
+                                        if i == len(difficulty_buttons) - 1:  # Exit button
+                                            pygame.quit()
+                                            sys.exit()
                                         difficulty = ['easy', 'medium', 'hard'][i]
                                         waiting_for_difficulty = False
+                        
+                        # Redraw screen to show tooltips on hover
+                        screen.fill(BLACK)
+                        difficulty_buttons = draw_difficulty_screen(screen)
+                        pygame.display.flip()
                         clock.tick(30)
                 elif event.key == pygame.K_UP and snake.direction != DOWN:
                     snake.direction = UP
