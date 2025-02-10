@@ -178,11 +178,41 @@ def spawn_enemy(snake_pos):
     enemy.position = (x, y)
     return enemy
 
+def draw_game_over_screen(screen, score):
+    # Semi-transparent overlay
+    overlay = pygame.Surface((WINDOW_SIZE, WINDOW_SIZE))
+    overlay.fill(BLACK)
+    overlay.set_alpha(128)
+    screen.blit(overlay, (0, 0))
+    
+    # Game Over text
+    font = pygame.font.Font(None, 74)
+    game_over_text = font.render('GAME OVER', True, WHITE)
+    score_text = font.render(f'Score: {score}', True, WHITE)
+    
+    # Restart button
+    button_font = pygame.font.Font(None, 36)
+    restart_text = button_font.render('Click to Restart', True, WHITE)
+    
+    # Position elements
+    game_over_rect = game_over_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 - 50))
+    score_rect = score_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 + 20))
+    restart_rect = restart_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 + 80))
+    
+    # Draw elements
+    screen.blit(game_over_text, game_over_rect)
+    screen.blit(score_text, score_rect)
+    screen.blit(restart_text, restart_rect)
+    
+    return restart_rect
+
 def main():
     snake = Snake()
     food = Food()
     enemies = []  # Start with no enemies
     running = True
+    game_over = False
+    restart_button_rect = None
 
     while running:
         for event in pygame.event.get():
@@ -221,10 +251,7 @@ def main():
             sx, sy = snake.get_head_position()
             if (abs(ex - sx) < GRID_SIZE and 
                 abs(ey - sy) < GRID_SIZE):
-                snake.reset()
-                food.randomize_position()
-                # Clear all enemies
-                enemies.clear()
+                game_over = True
 
         # Draw
         screen.fill(BLACK)
@@ -237,6 +264,20 @@ def main():
         font = pygame.font.Font(None, 36)
         score_text = font.render(f'Score: {snake.score}', True, WHITE)
         screen.blit(score_text, (10, 10))
+        
+        if game_over:
+            restart_button_rect = draw_game_over_screen(screen, snake.score)
+            # Handle restart button click
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if restart_button_rect.collidepoint(event.pos):
+                        game_over = False
+                        snake.reset()
+                        food.randomize_position()
+                        enemies.clear()
         
         pygame.display.update()
         clock.tick(10)  # Control game speed
