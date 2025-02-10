@@ -214,7 +214,11 @@ def draw_difficulty_screen(screen):
         # Show tooltip if mouse hovers over button
         if button_rect.collidepoint(mouse_pos):
             tooltip_text = tooltip_font.render(tooltip, True, WHITE)
-            tooltip_rect = tooltip_text.get_rect(midtop=(WINDOW_SIZE//2, button_rect.bottom + 5))
+            tooltip_rect = tooltip_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//4))
+            # Draw background for better readability
+            bg_rect = tooltip_rect.inflate(20, 10)
+            pygame.draw.rect(screen, BLACK, bg_rect)
+            pygame.draw.rect(screen, WHITE, bg_rect, 1)
             screen.blit(tooltip_text, tooltip_rect)
     
     # Exit button
