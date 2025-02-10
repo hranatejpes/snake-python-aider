@@ -193,15 +193,29 @@ def draw_difficulty_screen(screen):
     
     # Difficulty buttons
     button_font = pygame.font.Font(None, 36)
-    difficulties = ['Easy', 'Medium', 'Hard']
+    tooltip_font = pygame.font.Font(None, 24)
+    difficulties = [
+        ('Easy', 'Žádní nepřátelé - pouze had a jídlo'),
+        ('Medium', 'Občas se objeví pomalý nepřítel'),
+        ('Hard', 'Více nepřátel s různými rychlostmi')
+    ]
     button_rects = []
     
-    for i, diff in enumerate(difficulties):
+    mouse_pos = pygame.mouse.get_pos()
+    
+    for i, (diff, tooltip) in enumerate(difficulties):
         text = button_font.render(diff, True, WHITE)
         rect = text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE//2 - 20 + i * 60))
-        pygame.draw.rect(screen, WHITE, rect.inflate(20, 10), 2)
+        button_rect = rect.inflate(20, 10)
+        pygame.draw.rect(screen, WHITE, button_rect, 2)
         screen.blit(text, rect)
-        button_rects.append(rect.inflate(20, 10))
+        button_rects.append(button_rect)
+        
+        # Show tooltip if mouse hovers over button
+        if button_rect.collidepoint(mouse_pos):
+            tooltip_text = tooltip_font.render(tooltip, True, WHITE)
+            tooltip_rect = tooltip_text.get_rect(midtop=(WINDOW_SIZE//2, button_rect.bottom + 5))
+            screen.blit(tooltip_text, tooltip_rect)
     
     # Exit button
     exit_text = button_font.render('Exit', True, WHITE)
