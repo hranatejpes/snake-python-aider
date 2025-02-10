@@ -264,7 +264,29 @@ def main():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP and snake.direction != DOWN:
+                if event.key == pygame.K_ESCAPE:
+                    # Return to difficulty selection
+                    screen.fill(BLACK)
+                    difficulty_buttons = draw_difficulty_screen(screen)
+                    snake.reset()
+                    food.randomize_position()
+                    enemies.clear()
+                    food_counter = 0
+                    
+                    # Wait for difficulty selection
+                    waiting_for_difficulty = True
+                    while waiting_for_difficulty:
+                        for diff_event in pygame.event.get():
+                            if diff_event.type == pygame.QUIT:
+                                pygame.quit()
+                                sys.exit()
+                            elif diff_event.type == pygame.MOUSEBUTTONDOWN:
+                                for i, rect in enumerate(difficulty_buttons):
+                                    if rect.collidepoint(diff_event.pos):
+                                        difficulty = ['easy', 'medium', 'hard'][i]
+                                        waiting_for_difficulty = False
+                        clock.tick(30)
+                elif event.key == pygame.K_UP and snake.direction != DOWN:
                     snake.direction = UP
                 elif event.key == pygame.K_DOWN and snake.direction != UP:
                     snake.direction = DOWN
