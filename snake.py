@@ -17,6 +17,8 @@ RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 PINK = (255, 192, 203)
 PURPLE = (128, 0, 128)
+YELLOW = (255, 255, 0)
+BLUE = (0, 0, 255)
 
 # Initialize screen
 screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
@@ -59,16 +61,47 @@ class Snake:
 class Food:
     def __init__(self):
         self.position = (0, 0)
-        self.color = RED
         self.randomize_position()
+        self.randomize_type()
+
+    def randomize_type(self):
+        # Randomly choose food type with different probabilities
+        food_types = [
+            ('square', RED, 1, 0.5),     # 50% chance for 1 point
+            ('triangle', YELLOW, 2, 0.3), # 30% chance for 2 points
+            ('circle', BLUE, 3, 0.2)      # 20% chance for 3 points
+        ]
+        
+        choice = random.random()
+        cumulative_prob = 0
+        for shape, color, points, prob in food_types:
+            cumulative_prob += prob
+            if choice <= cumulative_prob:
+                self.shape = shape
+                self.color = color
+                self.points = points
+                break
 
     def randomize_position(self):
         self.position = (random.randint(0, GRID_COUNT-1) * GRID_SIZE,
                         random.randint(0, GRID_COUNT-1) * GRID_SIZE)
 
     def render(self):
-        pygame.draw.rect(screen, self.color, 
-                        (self.position[0], self.position[1], GRID_SIZE, GRID_SIZE))
+        x, y = self.position
+        if self.shape == 'square':
+            pygame.draw.rect(screen, self.color, 
+                           (x, y, GRID_SIZE, GRID_SIZE))
+        elif self.shape == 'triangle':
+            points = [
+                (x + GRID_SIZE/2, y),
+                (x, y + GRID_SIZE),
+                (x + GRID_SIZE, y + GRID_SIZE)
+            ]
+            pygame.draw.polygon(screen, self.color, points)
+        else:  # circle
+            pygame.draw.circle(screen, self.color,
+                             (int(x + GRID_SIZE/2), int(y + GRID_SIZE/2)),
+                             GRID_SIZE//2)
 
 # Directional constants
 UP = (0, -1)
@@ -174,8 +207,9 @@ def main():
         # Check for food collision
         if snake.get_head_position() == food.position:
             snake.length += 1
-            snake.score += 1
+            snake.score += food.points
             food.randomize_position()
+            food.randomize_type()
             # Spawn new enemy when food is eaten
             enemies.append(spawn_enemy(snake.get_head_position()))
 
