@@ -83,17 +83,21 @@ class Enemy:
         self.enemy_type = enemy_type
         if enemy_type == 'circle':
             self.color = WHITE
-            self.speed = 0.3
+            self.speed = 0.15
         elif enemy_type == 'square':
             self.color = PINK
-            self.speed = 0.5
+            self.speed = 0.25
         else:  # triangle
             self.color = PURPLE
-            self.speed = 0.7
+            self.speed = 0.35
             
     def move_towards(self, target_pos):
         x, y = self.position
         tx, ty = target_pos
+        
+        # Add random movement
+        tx += random.randint(-GRID_SIZE*3, GRID_SIZE*3)
+        ty += random.randint(-GRID_SIZE*3, GRID_SIZE*3)
         
         # Calculate direction
         dx = tx - x
@@ -127,14 +131,24 @@ class Enemy:
             ]
             pygame.draw.polygon(screen, self.color, points)
 
+def spawn_enemy(snake_pos):
+    # Don't spawn within 10 grid cells of snake
+    while True:
+        x = random.randint(0, GRID_COUNT-1) * GRID_SIZE
+        y = random.randint(0, GRID_COUNT-1) * GRID_SIZE
+        sx, sy = snake_pos
+        if abs(x - sx) > GRID_SIZE*10 or abs(y - sy) > GRID_SIZE*10:
+            break
+    
+    enemy_type = random.choice(['circle', 'square', 'triangle'])
+    enemy = Enemy(enemy_type)
+    enemy.position = (x, y)
+    return enemy
+
 def main():
     snake = Snake()
     food = Food()
-    enemies = [
-        Enemy('circle'),
-        Enemy('square'),
-        Enemy('triangle')
-    ]
+    enemies = []  # Start with no enemies
     running = True
 
     while running:
@@ -162,6 +176,8 @@ def main():
             snake.length += 1
             snake.score += 1
             food.randomize_position()
+            # Spawn new enemy when food is eaten
+            enemies.append(spawn_enemy(snake.get_head_position()))
 
         # Update enemies
         for enemy in enemies:
