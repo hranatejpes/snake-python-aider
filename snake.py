@@ -276,14 +276,19 @@ def main():
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
-                # Check exit button first (last button)
-                if difficulty_buttons[-1].collidepoint(mouse_pos):
-                    pygame.quit()
-                    sys.exit()
-                # Then check difficulty buttons
-                for i, rect in enumerate(difficulty_buttons[:-1]):  # Exclude exit button
+                for i, rect in enumerate(difficulty_buttons):
                     if rect.collidepoint(mouse_pos):
-                        difficulty = ['easy', 'medium', 'hard'][i]
+                        if i == len(difficulty_buttons) - 1:  # Exit button
+                            pygame.quit()
+                            sys.exit()
+                        else:
+                            difficulty = ['easy', 'medium', 'hard'][i]
+        
+        # Redraw screen to show tooltips on hover
+        screen.fill(BLACK)
+        difficulty_buttons = draw_difficulty_screen(screen)
+        pygame.display.flip()
+        clock.tick(30)
     
     while running:
         for event in pygame.event.get():
