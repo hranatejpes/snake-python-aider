@@ -41,12 +41,11 @@ class Snake:
         x, y = self.direction
         new = ((cur[0] + (x*GRID_SIZE)) % WINDOW_SIZE, (cur[1] + (y*GRID_SIZE)) % WINDOW_SIZE)
         if new in self.positions[3:]:
-            return False
-        else:
-            self.positions.insert(0, new)
-            if len(self.positions) > self.length:
-                self.positions.pop()
-            return True
+            return False  # Collision detected
+        self.positions.insert(0, new)
+        if len(self.positions) > self.length:
+            self.positions.pop()
+        return True
 
     def reset(self):
         self.length = 1
@@ -341,8 +340,8 @@ def main():
 
         # Update snake
         if not snake.update():
-            snake.reset()
-            food.randomize_position()
+            game_over = True
+            
 
         # Check for food collision
         if snake.get_head_position() == food.position:
